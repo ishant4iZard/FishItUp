@@ -105,7 +105,7 @@ void AFishingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFishingCharacter::Move);
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFishingCharacter::Look);
 
-        EnhancedInputComponent->BindAction(QTE_DirectionAction, ETriggerEvent::Started, this, &AFishingCharacter::QTE_Direction);
+        EnhancedInputComponent->BindAction(QTE_DirectionAction, ETriggerEvent::Triggered, this, &AFishingCharacter::QTE_Direction);
     }
 }
 
