@@ -87,6 +87,8 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
         MID->SetScalarParameterValue("AngleStart", Slices[i].AngleStart);
         MID->SetScalarParameterValue("AngleWidth", Slices[i].AngleWidth);
 
+
+
         FColor color;
 
         switch (Slices[i].Direction)

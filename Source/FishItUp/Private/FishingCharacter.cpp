@@ -26,6 +26,11 @@ AFishingCharacter::AFishingCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+    GetRootComponent()->Mobility = EComponentMobility::Movable;
+    bUseControllerRotationYaw = false;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -80,6 +85,8 @@ void AFishingCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    UpdateBoatMovement(DeltaTime);
+
 }
 
 void AFishingCharacter::NotifyControllerChanged()
@@ -103,6 +110,7 @@ void AFishingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AFishingCharacter::OnInteractPressed);
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFishingCharacter::Move);
+        EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AFishingCharacter::Move);
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFishingCharacter::Look);
 
         EnhancedInputComponent->BindAction(QTE_DirectionAction, ETriggerEvent::Started, this, &AFishingCharacter::QTE_Direction);
@@ -202,7 +210,12 @@ void AFishingCharacter::Move(const FInputActionValue& Value)
 {
     if (bQTEActive) return;
 
-    UE_LOG(LogTemp, Display, TEXT("I am Moving"));
+    const FVector2D Input = Value.Get<FVector2D>();
+
+    UE_LOG(LogTemp, Display, TEXT("steering input %f"), Input.X);
+
+    ThrottleInput = Input.Y; // W / Stick Up
+    SteeringInput = Input.X; // A / D or Stick X
 }
 
 void AFishingCharacter::Look(const FInputActionValue& Value)
@@ -246,6 +259,50 @@ void AFishingCharacter::QTE_Direction(const FInputActionValue& Value)
     }
 
     (Cast<UFishingQTEWidget>(FishingQTEWidget))->HandleQTEInput(Dir);
+}
+
+void AFishingCharacter::UpdateBoatMovement(float DeltaTime)
+{
+    if (FMath::Abs(ThrottleInput) > 0.1f)
+    {
+        CurrentSpeed += ThrottleInput * Acceleration * DeltaTime;
+    }
+    else
+    {
+        // Natural drag when no input
+        CurrentSpeed = FMath::FInterpTo(
+            CurrentSpeed,
+            0.f,
+            DeltaTime,
+            Deceleration / MaxSpeed
+        );
+    }
+
+    CurrentSpeed = FMath::Clamp(CurrentSpeed, -MaxSpeed * 0.5f, MaxSpeed);
+
+    // --- TURNING ---
+    float SpeedAlpha = FMath::Abs(CurrentSpeed) / MaxSpeed;
+    SpeedAlpha = FMath::Clamp(SpeedAlpha, 0.f, 1.f);
+
+    if (SpeedAlpha > 0.05f)
+    {
+        const float YawDelta =
+            SteeringInput *
+            TurnRate *
+            SpeedAlpha *
+            DeltaTime;
+
+        AddActorWorldRotation(
+            FRotator(0.f, YawDelta, 0.f)
+        );
+    }
+
+    // --- FORWARD MOVEMENT ---
+    const FVector Forward = GetActorForwardVector();
+    AddActorWorldOffset(
+        Forward * CurrentSpeed * DeltaTime,
+        true
+    );
 }
 
 void AFishingCharacter::HandleQTESuccess()
