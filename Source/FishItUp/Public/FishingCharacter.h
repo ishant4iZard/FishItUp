@@ -14,6 +14,9 @@ class UInputAction;
 
 struct FInputActionValue;
 
+//TODO : delegate for start of QTE and end of QTE
+//TODO : Point system for success
+
 UCLASS()
 class FISHITUP_API AFishingCharacter : public ACharacter
 {
@@ -63,6 +66,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* QTE_DirectionAction;
 
+	// Movement tuning
+	UPROPERTY(EditAnywhere, Category = "Boat Movement")
+	float MaxSpeed = 1200.f;
+
+	UPROPERTY(EditAnywhere, Category = "Boat Movement")
+	float Acceleration = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Boat Movement")
+	float Deceleration = 600.f;
+
+	UPROPERTY(EditAnywhere, Category = "Boat Movement")
+	float TurnRate = 15.f; // degrees per second at full speed
+
+	// Runtime
+	float CurrentSpeed = 0.f;
+	float SteeringInput = 0.f;
+	float ThrottleInput = 0.f;
+
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> FishingAlertWidgetClass;
@@ -98,6 +119,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void QTE_Direction(const FInputActionValue& Value);
+
+	void UpdateBoatMovement(float DeltaTime);
 
 public:
 
