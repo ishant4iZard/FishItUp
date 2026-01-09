@@ -426,7 +426,7 @@ int32 UFishingQTEWidget::ComputeFinalScore() const
         ? AccumulatedAccuracy / SuccessfulSlices
         : 0.f;
 
-    float DifficultyScoreToType = FMath::FloorToInt(Difficulty * 10) * 10000;
+    float DifficultyScoreToType = FMath::FloorToInt(Difficulty * 10);
     DifficultyScoreToType = FMath::Clamp(DifficultyScoreToType, 0, 9);
 
     float ExecutionQualityScore =  FMath::RoundToInt(

@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "FishingQTEWidget.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -77,7 +79,15 @@ void AFishingCharacter::BeginPlay()
         );
     }
 
-
+    if (FishingResultClass)
+    {
+        FishingResultWidget = CreateWidget(GetWorld(), FishingResultClass);
+        if (FishingResultWidget)
+        {
+            FishingResultWidget->AddToViewport();
+            FishingResultWidget->SetVisibility(ESlateVisibility::Hidden);
+        }
+    }
 
 
     FTimerHandle AlertStartTimer;
@@ -96,6 +106,8 @@ void AFishingCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     UpdateBoatMovement(DeltaTime);
+
+    UpdateWind();
 
 }
 
@@ -125,6 +137,31 @@ void AFishingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
         EnhancedInputComponent->BindAction(QTE_DirectionAction, ETriggerEvent::Started, this, &AFishingCharacter::QTE_Direction);
     }
+}
+
+void AFishingCharacter::UpdateWind()
+{
+    if (!WindMPC) return;
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    UMaterialParameterCollectionInstance* MPCInstance =
+        World->GetParameterCollectionInstance(WindMPC);
+
+    if (!MPCInstance) return;
+
+    FVector Velocity = GetVelocity();
+    float Speed = Velocity.Size();
+
+    FVector WindDir =
+        Speed > 10.f ? -Velocity.GetSafeNormal() : FVector(1,0,0);
+
+    MPCInstance->SetVectorParameterValue(
+        TEXT("WindDir"),
+        FLinearColor(WindDir)
+    );
+
 }
 
 void AFishingCharacter::ShowFisingAlert()
@@ -343,6 +380,7 @@ void AFishingCharacter::HandleQTESuccess(int32 Score)
 
     FFishStats& Stats = TargetMap.FindOrAdd(FishTypeIndex);
 
+
     Stats.TimesCaught++;
     Stats.TotalWeight += weight;
     Stats.HighestWeight = FMath::Max(Stats.HighestWeight, weight);
@@ -352,6 +390,8 @@ void AFishingCharacter::HandleQTESuccess(int32 Score)
         TEXT("FishSave"),
         0
     );
+
+    FishingResultUI(Fish.Name, Fish.Image, true);
 
     HideFishingQTE();
 }
@@ -367,5 +407,10 @@ void AFishingCharacter::HandleQTEFail()
         1.5f,
         false
     );
+
+    const FFishType& Fish = GI->FishTypeLibrary->Garbage[FMath::RandRange(0, GI->FishTypeLibrary->Garbage.Num()-1 )];
+
+    FishingResultUI(Fish.Name, Fish.Image, false);
+
 }
 

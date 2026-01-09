@@ -12,6 +12,7 @@
 class USpringArmComponent;
 class UInputMappingContext;
 class UInputAction;
+class UNiagaraComponent;
 
 struct FInputActionValue;
 struct FFishType;
@@ -86,18 +87,26 @@ protected:
 	float SteeringInput = 0.f;
 	float ThrottleInput = 0.f;
 
+	UPROPERTY(EditDefaultsOnly)
+	UMaterialParameterCollection* WindMPC;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> FishingAlertWidgetClass;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UUserWidget* FishingAlertWidget;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> FishingQTEWidgetClass;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UUserWidget* FishingQTEWidget;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> FishingResultClass;
+
+	UPROPERTY(BlueprintReadOnly)
+	UUserWidget* FishingResultWidget;
 
 	UPROPERTY()
 	bool bFishingAlertActive = false;
@@ -109,6 +118,8 @@ private:
 	UFishingGameInstance* GI;
 
 	UFishSaveGame* SaveGame;
+
+	void UpdateWind();
 
 protected:
 
@@ -130,6 +141,13 @@ protected:
 	void QTE_Direction(const FInputActionValue& Value);
 
 	void UpdateBoatMovement(float DeltaTime);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void FishingResultUI(
+		const FString& FishName,
+		UTexture2D* FishImage,
+		bool bDidWin
+	);
 
 public:
 

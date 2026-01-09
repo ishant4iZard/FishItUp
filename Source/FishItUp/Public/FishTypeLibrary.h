@@ -23,4 +23,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TArray<FFishType> ShinyFish;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TArray<FFishType> Garbage;
 };
