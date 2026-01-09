@@ -41,7 +41,7 @@ struct FQTESlice
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQTESliceSuccess);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQTESuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQTESuccess,int32, Score);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQTEFail);
 
 UCLASS()
@@ -89,8 +89,12 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float ArrowRotationSpeed = 45.f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float SpeedMult = 1.25f;
 
-    const float DefaultArrowRotationSpeed = 45.f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float DefaultArrowRotationSpeed = 45.f;
 
     float CurrentArrowAngle = 0.f;
 
@@ -100,6 +104,14 @@ protected:
 
     float ThicknessPulse = 0.f;
     float PulseSpeed = 6.f;
+
+
+    float AccumulatedAccuracy = 0.f;
+    int32 SuccessfulSlices = 0;
+    bool bPerfectRun = true;
+
+    UPROPERTY(EditDefaultsOnly, Category = "QTE|Scoring")
+    float MaxScore = 100000.f;
 
 public:
     UFUNCTION(BlueprintCallable)
@@ -130,4 +142,10 @@ protected:
     void PlaySliceSuccessFeedback(int32 SliceIndex);
 
     void PlayFailFeedback(int32 SliceIndex);
+
+    float ComputeSliceAccuracy(float ArrowAngle, const FQTESlice& Slice) const;
+
+    float ComputeDifficulty() const;
+
+    int32 ComputeFinalScore() const;
 };

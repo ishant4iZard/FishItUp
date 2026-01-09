@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "FishingQTEWidget.h"
+#include "Kismet/GameplayStatics.h"
+
 
 // Sets default values
 AFishingCharacter::AFishingCharacter()
@@ -31,12 +33,20 @@ AFishingCharacter::AFishingCharacter()
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = false;
 
+   
 }
 
 // Called when the game starts or when spawned
 void AFishingCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+    GI = GetWorld()->GetGameInstance<UFishingGameInstance>();
+
+    if (!GI || !GI->CurrentSaveGame)
+        return;
+
+    SaveGame = GI->CurrentSaveGame;
 	
     if (FishingAlertWidgetClass)
     {
@@ -305,10 +315,44 @@ void AFishingCharacter::UpdateBoatMovement(float DeltaTime)
     );
 }
 
-void AFishingCharacter::HandleQTESuccess()
+void AFishingCharacter::HandleQTESuccess(int32 Score)
 {
-    UE_LOG(LogTemp, Display, TEXT("Fish Caught Succesfully"));
+    UE_LOG(LogTemp, Display, TEXT("Fish Caught Succesfully %d"), Score);
     bQTEActive = false;
+    int FishTypeIndex = Score / 10000;
+    bool bIsShiny = (Score % 10000) > 9000;
+
+    float weight;
+
+    if (bIsShiny) {
+        weight = ((Score % 10000) - 9000) / 100;
+    }
+    else {
+        weight = (Score % 10000) / 100;
+    }
+
+    const FFishType& Fish =
+        bIsShiny
+        ? GI->FishTypeLibrary->ShinyFish[FishTypeIndex]
+        : GI->FishTypeLibrary->NonShinyFish[FishTypeIndex];
+
+    TMap<int32, FFishStats>& TargetMap =
+        bIsShiny
+        ? SaveGame->ShinyFishStatsMap
+        : SaveGame->FishStatsMap;
+
+    FFishStats& Stats = TargetMap.FindOrAdd(FishTypeIndex);
+
+    Stats.TimesCaught++;
+    Stats.TotalWeight += weight;
+    Stats.HighestWeight = FMath::Max(Stats.HighestWeight, weight);
+
+    UGameplayStatics::SaveGameToSlot(
+        SaveGame,
+        TEXT("FishSave"),
+        0
+    );
+
     HideFishingQTE();
 }
 

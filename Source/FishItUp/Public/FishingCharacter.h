@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "FishingGameInstance.h"
 
 #include "FishingCharacter.generated.h"
 
@@ -13,6 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 
 struct FInputActionValue;
+struct FFishType;
 
 //TODO : delegate for start of QTE and end of QTE
 //TODO : Point system for success
@@ -103,6 +105,13 @@ protected:
 	UPROPERTY()
 	bool bQTEActive = false;
 
+private:
+	UFishingGameInstance* GI;
+
+	UFishSaveGame* SaveGame;
+
+protected:
+
 	void ShowFisingAlert();
 	void HideFishingAlert();
 
@@ -110,7 +119,7 @@ protected:
 	void HideFishingQTE();
 
 	UFUNCTION()
-	void HandleQTESuccess();
+	void HandleQTESuccess(int32 score);
 	UFUNCTION()
 	void HandleQTEFail();
 

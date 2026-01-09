@@ -23,6 +23,9 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
     CurrentSliceIndex = 0;
     bQTEFailed = false;
     ArrowRotationSpeed = 0.f;
+    AccumulatedAccuracy = 0.f;
+    SuccessfulSlices = 0;
+    bPerfectRun = true;
 
     FTimerHandle ArrowRotationTimerHandle;
     GetWorld()->GetTimerManager().SetTimer(
@@ -183,6 +186,8 @@ TArray<FQTESlice> UFishingQTEWidget::GenerateQTESlices()
 
     BuildSlicesFromSizes(SliceSizes, Gaps);
 
+    SpeedMult = FMath::FRandRange(0.7f, 2.f);
+
     return QTESlices;
 }
 
@@ -281,7 +286,7 @@ bool UFishingQTEWidget::IsAngleInSlice(float Angle, const FQTESlice& Slice) cons
 
 void UFishingQTEWidget::HandleQTEInput(EQTEDirection InputDir)
 {
-    if (bQTEFailed || !QTESlices.IsValidIndex(CurrentSliceIndex))
+    if (bQTEFailed || !QTESlices.IsValidIndex(CurrentSliceIndex) || ArrowRotationSpeed <0.1f)
         return;
 
     UE_LOG(LogTemp, Display, TEXT("QTEInput getting"));
@@ -303,6 +308,19 @@ void UFishingQTEWidget::HandleQTEInput(EQTEDirection InputDir)
 
 void UFishingQTEWidget::OnSliceSuccess()
 {
+    const FQTESlice& Slice = QTESlices[CurrentSliceIndex];
+
+    float Accuracy =
+        ComputeSliceAccuracy(CurrentArrowAngle, Slice);
+
+    AccumulatedAccuracy += Accuracy;
+    SuccessfulSlices++;
+
+    if (Accuracy < 0.95f)
+    {
+        bPerfectRun = false;
+    }
+
     PlaySliceSuccessFeedback(CurrentSliceIndex);
 
     CurrentSliceIndex++;
@@ -317,7 +335,9 @@ void UFishingQTEWidget::OnSliceSuccess()
 
 void UFishingQTEWidget::OnQTESuccessInternal()
 {
-    OnQTESuccess.Broadcast();
+    int32 FinalScore = ComputeFinalScore();
+
+    OnQTESuccess.Broadcast(FinalScore);
 }
 
 void UFishingQTEWidget::OnQTEFailInternal()
@@ -342,4 +362,76 @@ void UFishingQTEWidget::PlaySliceSuccessFeedback(int32 SliceIndex)
 void UFishingQTEWidget::PlayFailFeedback(int32 SliceIndex)
 {
     SliceMIDs[SliceIndex+1]->SetScalarParameterValue("Saturation", 0.5f);
+}
+
+float UFishingQTEWidget::ComputeSliceAccuracy(float ArrowAngle, const FQTESlice& Slice) const
+{
+    float SliceCenter =
+        Slice.AngleStart + (Slice.AngleWidth * 0.5f);
+
+    float Delta =
+        FMath::Abs(
+            FMath::FindDeltaAngleDegrees(ArrowAngle, SliceCenter)
+        );
+
+    float HalfWidth = Slice.AngleWidth * 0.5f;
+
+    return FMath::Clamp(
+        1.f - (Delta / HalfWidth),
+        0.f,
+        1.f
+    );
+}
+
+float UFishingQTEWidget::ComputeDifficulty() const
+{
+    float AvgSliceSize = 0.f;
+    for (const FQTESlice& Slice : QTESlices)
+    {
+        AvgSliceSize += Slice.AngleWidth;
+    }
+    AvgSliceSize /= QTESlices.Num();
+
+    float SliceWidthFactor =
+        FMath::GetMappedRangeValueClamped(
+            FVector2D(20.f, 40.f),
+            FVector2D(0.f, 1.f),
+            AvgSliceSize
+        );
+
+    float SliceCountFactor =
+        FMath::GetMappedRangeValueClamped(
+            FVector2D( 3.f, 5.f ), FVector2D( 0.f, 1.f ), QTESlices.Num()
+        );
+
+    float SpeedFactor =
+        FMath::GetMappedRangeValueClamped(
+            FVector2D( 0.7f, 2.f ), FVector2D( 0.f, 1.f ), SpeedMult
+        );
+
+    return FMath::Clamp(
+        SliceWidthFactor * 0.35f +
+        SliceCountFactor * 0.30f +
+        SpeedFactor * 0.35f,
+        0.f, 1.f
+    );
+}
+
+int32 UFishingQTEWidget::ComputeFinalScore() const
+{
+    float Difficulty = ComputeDifficulty();
+
+    float ExecutionQuality =
+        (SuccessfulSlices > 0)
+        ? AccumulatedAccuracy / SuccessfulSlices
+        : 0.f;
+
+    float DifficultyScoreToType = FMath::FloorToInt(Difficulty * 10) * 10000;
+    DifficultyScoreToType = FMath::Clamp(DifficultyScoreToType, 0, 9);
+
+    float ExecutionQualityScore =  FMath::RoundToInt(
+        ExecutionQuality * 9999.f
+    );
+
+    return FMath::RoundToInt(DifficultyScoreToType * 10000 + ExecutionQualityScore);
 }
