@@ -78,6 +78,19 @@ protected:
     UPROPERTY(EditAnywhere, meta = (BindWidget))
     UImage* ArrowImage;
 
+    UPROPERTY(EditAnywhere)
+    UTexture2D* WImage;
+    
+    UPROPERTY(EditAnywhere)
+    UTexture2D* SImage;
+    
+    UPROPERTY(EditAnywhere)
+    UTexture2D* AImage;
+    
+    UPROPERTY(EditAnywhere)
+    UTexture2D* DImage;
+
+
     UPROPERTY()
     TArray<UImage*> SliceImages;
 
@@ -112,6 +125,11 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "QTE|Scoring")
     float MaxScore = 100000.f;
+
+private:
+    const float RingRadius = 150.f;      // Half of 300
+    const float IconOffset = 30.f;       // Push outward
+    const float IconRadius = RingRadius + IconOffset;
 
 public:
     UFUNCTION(BlueprintCallable)

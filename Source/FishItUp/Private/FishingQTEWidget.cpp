@@ -90,7 +90,15 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
         MID->SetScalarParameterValue("AngleStart", Slices[i].AngleStart);
         MID->SetScalarParameterValue("AngleWidth", Slices[i].AngleWidth);
 
+        const float MidAngleDeg = Slices[i].AngleStart + Slices[i].AngleWidth * 0.5f;
+        const float MidAngleRad = FMath::DegreesToRadians(MidAngleDeg - 90);
 
+        FVector2D IconOffsetFromCenter;
+        IconOffsetFromCenter.X = FMath::Cos(MidAngleRad) * IconRadius;
+        IconOffsetFromCenter.Y = FMath::Sin(MidAngleRad) * IconRadius;
+
+        UImage* InputImage = NewObject<UImage>(this);
+        UTexture2D* InputTexture = nullptr;
 
         FColor color;
 
@@ -102,21 +110,36 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
         }
         case EQTEDirection::Up: {
             color = FColor::Red;
+            InputTexture = WImage;
             break;
         }
         case EQTEDirection::Right: {
             color = FColor::Yellow;
+            InputTexture = DImage;
             break;
         }
         case EQTEDirection::Down: {
             color = FColor::Green;
+            InputTexture = SImage;
             break;
         }
         case EQTEDirection::Left: {
             color = FColor::Blue;
+            InputTexture = AImage;
             break;
         }
         }
+
+        InputImage->SetBrushFromTexture(InputTexture);
+
+        UCanvasPanelSlot* InputSlot =
+            RingCanvas->AddChildToCanvas(InputImage);
+
+        InputSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+        InputSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+
+        InputSlot->SetPosition(IconOffsetFromCenter);
+        InputSlot->SetSize(FVector2D(48.f, 48.f));
 
         MID->SetVectorParameterValue("RingColor", color);
 
