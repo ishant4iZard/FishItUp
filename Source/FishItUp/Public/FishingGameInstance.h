@@ -25,7 +25,7 @@ public:
 	UFishSaveGame* CurrentSaveGame;
 
 	UFUNCTION(BlueprintCallable)
-	void BuildFishGlossary(UFishSaveGame* SaveGame, TArray<FFishGlossaryEntry>& OutNormalEntries, TArray<FFishGlossaryEntry>& OutShinyEntries);
+	void BuildFishGlossary(TArray<FFishGlossaryEntry>& OutNormalEntries, TArray<FFishGlossaryEntry>& OutShinyEntries);
 
 protected:
 	virtual void Init()override;

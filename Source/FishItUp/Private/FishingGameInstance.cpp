@@ -22,7 +22,7 @@ void UFishingGameInstance::Init()
     }
 }
 
-void UFishingGameInstance::BuildFishGlossary(UFishSaveGame* SaveGame, TArray<FFishGlossaryEntry>& OutNormalEntries, TArray<FFishGlossaryEntry>& OutShinyEntries)
+void UFishingGameInstance::BuildFishGlossary(TArray<FFishGlossaryEntry>& OutNormalEntries, TArray<FFishGlossaryEntry>& OutShinyEntries)
 {
     OutNormalEntries.Empty();
     OutShinyEntries.Empty();
@@ -45,10 +45,10 @@ void UFishingGameInstance::BuildFishGlossary(UFishSaveGame* SaveGame, TArray<FFi
         ShinyEntry.Image = ShinyFishType.Image;
 
         const FFishStats* NormalStats =
-            SaveGame->FishStatsMap.Find(FishIndex);
+            CurrentSaveGame->FishStatsMap.Find(FishIndex);
 
         const FFishStats* ShinyStats =
-            SaveGame->ShinyFishStatsMap.Find(FishIndex);
+            CurrentSaveGame->ShinyFishStatsMap.Find(FishIndex);
 
         NormalEntry.TimesCaught =
             NormalStats ? NormalStats->TimesCaught : 0;
@@ -70,11 +70,11 @@ void UFishingGameInstance::BuildFishGlossary(UFishSaveGame* SaveGame, TArray<FFi
             NormalEntry.TimesCaught > 0;
 
         ShinyEntry.bIsDiscovered =
-            NormalEntry.TimesCaught > 0;
+            ShinyEntry.TimesCaught > 0;
 
 
         OutNormalEntries.Add(NormalEntry);
-        OutShinyEntries.Add(NormalEntry);
+        OutShinyEntries.Add(ShinyEntry);
     }
 
 }

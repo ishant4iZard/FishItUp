@@ -30,13 +30,13 @@ struct FFishStats
 {
     GENERATED_BODY()
 
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 TimesCaught = 0;
 
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float TotalWeight = 0.f;
 
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float HighestWeight = 0.f;
 };
 
@@ -60,6 +60,9 @@ struct FFishGlossaryEntry
 
     UPROPERTY(BlueprintReadOnly)
     float HighestWeight;
+
+    UPROPERTY(BlueprintReadOnly)
+    float TotalWeight;
 
     UPROPERTY(BlueprintReadOnly)
     FString Name;
