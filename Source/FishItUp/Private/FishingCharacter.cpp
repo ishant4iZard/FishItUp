@@ -335,7 +335,7 @@ void AFishingCharacter::UpdateBoatMovement(float DeltaTime)
     {
         const float YawDelta =
             SteeringInput *
-            FMath::Sign(CurrentSpeed)*
+            FMath::Sign(CurrentSpeed) *
             TurnRate *
             SpeedAlpha *
             DeltaTime;
