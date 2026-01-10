@@ -82,6 +82,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Boat Movement")
 	float TurnRate = 15.f; // degrees per second at full speed
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	USoundWave FishingAlertWidgetClass;
+
 	// Runtime
 	float CurrentSpeed = 0.f;
 	float SteeringInput = 0.f;
@@ -122,7 +125,7 @@ private:
 	void UpdateWind();
 
 protected:
-
+	UFUNCTION(BlueprintCallable)
 	void ShowFisingAlert();
 	void HideFishingAlert();
 
@@ -131,6 +134,10 @@ protected:
 
 	UFUNCTION()
 	void HandleQTESuccess(int32 score);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HandleQTESliceSuccess();
+
 	UFUNCTION()
 	void HandleQTEFail();
 

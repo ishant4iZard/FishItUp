@@ -73,6 +73,11 @@ void AFishingCharacter::BeginPlay()
             &AFishingCharacter::HandleQTESuccess
         );
 
+        temp->OnQTESliceSuccess.AddDynamic(
+            this,
+            &AFishingCharacter::HandleQTESliceSuccess
+        );
+
         temp->OnQTEFail.AddDynamic(
             this,
             &AFishingCharacter::HandleQTEFail
@@ -90,14 +95,7 @@ void AFishingCharacter::BeginPlay()
     }
 
 
-    FTimerHandle AlertStartTimer;
-    GetWorldTimerManager().SetTimer(
-        AlertStartTimer,
-        this,
-        &AFishingCharacter::ShowFisingAlert,
-        10.f,
-        true
-    );
+    
 }
 
 // Called every frame
@@ -240,6 +238,15 @@ void AFishingCharacter::HideFishingQTE()
     }
 
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+    FTimerHandle AlertStartTimer;
+    GetWorldTimerManager().SetTimer(
+        AlertStartTimer,
+        this,
+        &AFishingCharacter::ShowFisingAlert,
+        FMath::RandRange(5,15),
+        false
+    );
 }
 
 void AFishingCharacter::OnInteractPressed()
