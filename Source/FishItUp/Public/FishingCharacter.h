@@ -67,6 +67,12 @@ protected:
 	UInputAction* LookAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GlossaryAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* NextDialogueAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* QTE_DirectionAction;
 
 	// Movement tuning
@@ -134,6 +140,12 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HandleQTESliceSuccess();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void Glossary();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void NextDialogue();
 
 	UFUNCTION()
 	void HandleQTEFail();
