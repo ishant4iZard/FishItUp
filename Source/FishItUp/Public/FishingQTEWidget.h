@@ -107,7 +107,7 @@ protected:
     float SpeedMult = 1.25f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float DefaultArrowRotationSpeed = 45.f;
+    float DefaultArrowRotationSpeed = 60.f;
 
     float CurrentArrowAngle = 0.f;
 
