@@ -275,6 +275,13 @@ void UFishingQTEWidget::RotateArrow(float DeltaTime)
         return;
 
     CurrentArrowAngle += ArrowRotationSpeed * DeltaTime;
+
+    if (CurrentArrowAngle > 360) {
+        ArrowRotationSpeed = 0.f;
+
+        OnQTEFail.Broadcast();
+    }
+
     CurrentArrowAngle = FMath::Fmod(CurrentArrowAngle, 360.f);
 
     FWidgetTransform Transform;

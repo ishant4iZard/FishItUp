@@ -192,6 +192,17 @@ void AFishingCharacter::HideFishingAlert()
     {
         FishingAlertWidget->SetVisibility(ESlateVisibility::Hidden);
     }
+
+    if (!bQTEActive) {
+        FTimerHandle AlertStartTimer;
+        GetWorldTimerManager().SetTimer(
+            AlertStartTimer,
+            this,
+            &AFishingCharacter::ShowFisingAlert,
+            FMath::RandRange(5, 15),
+            false
+        );
+    }
 }
 
 void AFishingCharacter::ShowFishingQTE()
@@ -246,7 +257,7 @@ void AFishingCharacter::HideFishingQTE()
         AlertStartTimer,
         this,
         &AFishingCharacter::ShowFisingAlert,
-        FMath::RandRange(5,15),
+        FMath::RandRange(5, 15),
         false
     );
 }
@@ -258,8 +269,8 @@ void AFishingCharacter::OnInteractPressed()
         return;
 
     // Valid fishing window
-    HideFishingAlert();
     ShowFishingQTE();
+    HideFishingAlert();
 }
 
 void AFishingCharacter::Move(const FInputActionValue& Value)
