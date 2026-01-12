@@ -73,7 +73,7 @@ protected:
 	UInputAction* NextDialogueAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* QTE_DirectionAction;`
+	UInputAction* QTE_DirectionAction;
 
 	// Movement tuning
 	UPROPERTY(EditAnywhere, Category = "Boat Movement")

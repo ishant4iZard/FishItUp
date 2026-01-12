@@ -59,7 +59,7 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
         // Set parameters
         MID->SetScalarParameterValue("AngleStart", 0);
         MID->SetScalarParameterValue("AngleWidth", 360);
-        MID->SetVectorParameterValue("RingColor", FColor(115, 115, 115));
+        MID->SetVectorParameterValue("RingColor", FColor(35, 35, 35));
 
         SliceImages.Add(SliceImage);
         SliceMIDs.Add(MID);
@@ -105,7 +105,7 @@ void UFishingQTEWidget::BuildSlices(const TArray<FQTESlice>& Slices)
         switch (Slices[i].Direction)
         {
         case EQTEDirection::None: {
-            color = FColor(128, 128, 128);
+            color = FColor(255, 255, 255);
             break;
         }
         case EQTEDirection::Up: {
